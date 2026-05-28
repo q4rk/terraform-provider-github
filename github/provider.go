@@ -31,13 +31,11 @@ func NewProvider() func() *schema.Provider {
 				"owner": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					DefaultFunc: schema.EnvDefaultFunc("GITHUB_OWNER", nil),
 					Description: "GitHub organization or user account to manage; this is required when authenticating using a GitHub App. If the owner is not provided and a token is provided, the provider will attempt to auto-detect the owner associated with the token. This can also be set by the `GITHUB_OWNER` environment variable.",
 				},
 				"organization": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					DefaultFunc: schema.EnvDefaultFunc("GITHUB_ORGANIZATION", nil),
 					Description: "GitHub organization to manage. This can also be set by the `GITHUB_ORGANIZATION` environment variable.",
 					Deprecated:  "This argument is deprecated and will be removed in a future major release; use `owner` instead.",
 				},
@@ -305,34 +303,26 @@ func NewProvider() func() *schema.Provider {
 func configureProvider() func(context.Context, *schema.ResourceData) (any, diag.Diagnostics) {
 	return func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 		owner := d.Get("owner").(string)
+		org := d.Get("organization").(string)
 		token := d.Get("token").(string)
 		insecure := d.Get("insecure").(bool)
 
-		// BEGIN backwards compatibility
-		// OwnerOrOrgEnvDefaultFunc used to be the default value for both
-		// 'owner' and 'organization'. This meant that if 'owner' and
-		// 'GITHUB_OWNER' were set, 'GITHUB_OWNER' would be used as the default
-		// value of 'organization' and therefore override 'owner'.
-		//
-		// This seems undesirable (an environment variable should not override
-		// an explicitly set value in a provider block), but is necessary
-		// for backwards compatibility. We could remove this backwards compatibility
-		// code in a future major release.
-		env := ownerOrOrgEnvDefaultFunc()
-		if env.(string) != "" {
-			owner = env.(string)
+		if owner == "" && org == "" {
+			if envOrg := os.Getenv("GITHUB_ORGANIZATION"); envOrg != "" {
+				log.Printf("[INFO] Selecting owner %s from GITHUB_ORGANIZATION environment variable", envOrg)
+				owner = envOrg
+			} else if envOwner := os.Getenv("GITHUB_OWNER"); envOwner != "" {
+				log.Printf("[INFO] Selecting owner %s from GITHUB_OWNER environment variable", envOwner)
+				owner = envOwner
+			}
+		} else if org != "" {
+			log.Printf("[INFO] Selecting organization attribute as owner: %s", org)
+			owner = org
 		}
-		// END backwards compatibility
 
 		baseURL, isGHES, err := getBaseURL(d.Get("base_url").(string))
 		if err != nil {
 			return nil, diag.FromErr(err)
-		}
-
-		org := d.Get("organization").(string)
-		if org != "" {
-			log.Printf("[INFO] Selecting organization attribute as owner: %s", org)
-			owner = org
 		}
 
 		if appAuth, ok := d.Get("app_auth").([]any); ok && len(appAuth) > 0 && appAuth[0] != nil {
