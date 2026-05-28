@@ -33,14 +33,12 @@ data "github_repository" "example" {
 
 ## Owner
 
-For backwards compatibility; if more than one of `owner`, `organization`, `GITHUB_OWNER` and `GITHUB_ORGANIZATION` are set the first in this list takes priority.
+For backwards compatibility; if more than one of `owner`, `organization`, `GITHUB_OWNER` and `GITHUB_ORGANIZATION` are set, the following priority is used:
 
 1. Setting `organization` in the GitHub provider configuration.
-2. Setting the `GITHUB_ORGANIZATION` environment variable.
-3. Setting the `GITHUB_OWNER` environment variable.
-4. Setting `owner` in the GitHub provider configuration.
-
-!> It is a bug that `GITHUB_OWNER` takes precedence over `owner`; this will be fixed in a future major release. For compatibility with future releases, please set only one of `GITHUB_OWNER` and `owner`.
+2. Setting `owner` in the GitHub provider configuration.
+3. Setting the `GITHUB_ORGANIZATION` environment variable.
+4. Setting the `GITHUB_OWNER` environment variable.
 
 ## Authentication
 
