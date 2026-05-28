@@ -50,11 +50,9 @@ func TestProviderConfigure_Precedence(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			p := NewProvider()()
 
-			// Set env vars
 			t.Setenv("GITHUB_OWNER", tc.envOwner)
 			t.Setenv("GITHUB_ORGANIZATION", tc.envOrg)
 
-			// Prepare HCL config map
 			config := map[string]interface{}{
 				"token": "dummy-token",
 			}
