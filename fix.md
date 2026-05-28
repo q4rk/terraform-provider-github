@@ -215,7 +215,7 @@ This PR is fully complementary to the ongoing provider auth overhaul:
 
 - [ ] Schema migrations have been created if needed
 - [x] Tests for the changes have been added (for bug fixes / features)
-- [ ] Docs have been reviewed and added / updated if needed (for bug fixes / features)
+- [x] Docs have been reviewed and added / updated if needed (for bug fixes / features)
 
 ### Does this introduce a breaking change?
 
